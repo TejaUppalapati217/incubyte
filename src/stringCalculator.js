@@ -4,23 +4,31 @@ function add(numbers) {
       return 0;
   }
 
-  // Split the numbers based on commas or new lines
   let numArray;
+
   if (numbers.startsWith("//")) {
-      const [delimiter, numString] = numbers.slice(2).split("\n");
-      numArray = numString.split(delimiter);
+      const delimiterSection = numbers.slice(2).split("\n")[0];
+      const delimiters = delimiterSection.match(/(\[.*?\])/g) ? 
+          delimiterSection.match(/(\[.*?\])/g).map(d => d.slice(1, -1)) : 
+          [delimiterSection];
+      const regex = new RegExp(delimiters.join('|'), 'g');
+      numArray = numbers.slice(delimiterSection.length + 3).split(regex);
   } else {
       numArray = numbers.split(/[,|\n]/);
   }
 
-  // Check for negative numbers
+  // Check for negative numbers and calculate sum
   const negatives = [];
   const sum = numArray.reduce((acc, num) => {
       const number = Number(num);
       if (number < 0) {
           negatives.push(number);
       }
-      return acc + number;
+      // Only add numbers less than or equal to 1000 to the sum
+      if (number <= 1000) {
+          acc += number;
+      }
+      return acc;
   }, 0);
 
   // Throw error if there are negative numbers
@@ -28,7 +36,7 @@ function add(numbers) {
       throw new Error(`negative numbers not allowed: ${negatives.join(", ")}`);
   }
 
-  return sum; // Ensure we return the calculated sum
+  return sum; // Return the final sum
 }
 
 module.exports = { add };
